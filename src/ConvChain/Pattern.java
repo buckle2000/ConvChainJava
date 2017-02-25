@@ -38,7 +38,7 @@ class Pattern {
         int result = 0;
         for (boolean[] row : data)
             for (boolean datum : row) {
-                result *= 2;
+                result <<= 1;
                 result += datum ? 1 : 0;
             }
         return result;
