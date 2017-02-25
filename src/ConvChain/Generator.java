@@ -1,12 +1,14 @@
 package ConvChain;
 
 
+import java.util.HashMap;
 import java.util.Random;
 
 public class Generator {
     public double temperature;
     public Random random;
     public boolean[][] field;
+    public final double DEFAULT_WEIGHT = 0.01;
 
     private int N;
     private int width;
@@ -21,7 +23,7 @@ public class Generator {
     }
 
     private Pattern[] patterns;
-    private double[] weights;
+    private HashMap<Integer, Double> weights;
 
     public Generator(boolean[][] sample, int N, double temperature, int width, int height) {
         this.N = N;
@@ -30,7 +32,7 @@ public class Generator {
         this.height = height;
         this.random = new Random();
         this.field = new boolean[width][height];
-        this.weights = new double[1 << (N * N)];
+        this.weights = new HashMap<>();
 
         for (int y = 0; y < sample[0].length; y++)
             for (int x = 0; x < sample.length; x++) {
@@ -43,11 +45,16 @@ public class Generator {
                 p[5] = p[1].getReflected();
                 p[6] = p[2].getReflected();
                 p[7] = p[3].getReflected();
-                for (int k = 0; k < 8; k++) weights[p[k].getIndex()] += 1;
+                for (int k = 0; k < 8; k++)
+                    weights.put(p[k].getIndex(), weights.getOrDefault(p[k].getIndex(), 0.) + 1.);
             }
 
-        for (int k = 0; k < weights.length; k++)
-            if (weights[k] <= 0) weights[k] = 0.1;
+        weights.replaceAll((pattern, weight) -> {
+            if (weight <= 0.)
+                return DEFAULT_WEIGHT;
+            else
+                return weight;
+        });
 
         for (int y = 0; y < height; y++)
             for (int x = 0; x < width; x++)
@@ -58,7 +65,7 @@ public class Generator {
         double value = 1.0;
         for (int y = j - N + 1; y <= j + N - 1; y++)
             for (int x = i - N + 1; x <= i + N - 1; x++)
-                value *= weights[new Pattern(field, x, y, N).getIndex()];
+                value *= weights.getOrDefault(new Pattern(field, x, y, N).getIndex(), DEFAULT_WEIGHT);
         return value;
     }
 
