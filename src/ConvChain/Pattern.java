@@ -1,5 +1,6 @@
 package ConvChain;
 
+import java.util.Arrays;
 import java.util.function.BiPredicate;
 
 class Pattern {
@@ -35,9 +36,11 @@ class Pattern {
 
     public int getIndex() {
         int result = 0;
-        for (int y = 0; y < getSize(); y++)
-            for (int x = 0; x < getSize(); x++)
-                result += data[x][y] ? 1 << (y * getSize() + x) : 0;
+        for (boolean[] row : data)
+            for (boolean datum : row) {
+                result *= 2;
+                result += datum ? 1 : 0;
+            }
         return result;
     }
 }
